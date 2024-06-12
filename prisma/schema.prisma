@@ -1,0 +1,138 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Order {
+  id                                 String     @id @default(auto()) @map("_id") @db.ObjectId
+  courier_delivery_instructions      String?
+  courier_job_id                     String
+  delivery_address                   String
+  delivery_instructions              String?
+  delivery_postcode                  String
+  delivery_state                     String
+  delivery_suburb                    String
+  invoice_number                     String
+  parcels                            Parcel[]
+  products                           Product[]
+  price                              Float
+  receiver_contact_number            String?
+  receiver_language_code             String
+  receiver_name                      String
+  retailer_invoice                   String?
+  slug                               String
+  state                              String
+  processing_state                   String?
+  tracking_number                    String
+  tracking_url                       String
+  tracking                           Tracking[]
+  user                               User?      @relation(fields: [userId], references: [id])
+  userId                             String?    @db.ObjectId
+  customs_documents_require_printing Boolean
+  documents                          Json
+  merchantId                         String     @db.ObjectId
+  merchant                           Merchant   @relation(fields: [merchantId], references: [id])
+  courierId                          String?    @db.ObjectId
+  courier                            Courier?   @relation(fields: [courierId], references: [id])
+}
+
+model Parcel {
+  id           String  @id @default(auto()) @map("_id") @db.ObjectId
+  orderId      String  @db.ObjectId
+  depth        Float
+  length       Float
+  name         String?
+  weight       Float
+  width        Float
+  label_number String
+  courier_data Json
+
+  order Order @relation(fields: [orderId], references: [id])
+}
+
+model Product {
+  id                   String @id @default(auto()) @map("_id") @db.ObjectId
+  orderId              String @db.ObjectId
+  title                String
+  price                Float
+  sku                  Float
+  quantity             Int
+  tariff_code          String
+  dangerous_goods_code String
+  dangerous_goods_text String
+  origin_country_code  String
+
+  order Order @relation(fields: [orderId], references: [id])
+}
+
+model Tracking {
+  id              String  @id @default(auto()) @map("_id") @db.ObjectId
+  orderId         String  @db.ObjectId
+  tracking_number String
+  tracking_url    String
+  success         Boolean
+  track           Track[]
+
+  order Order @relation(fields: [orderId], references: [id])
+}
+
+model Track {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  trackingId   String   @db.ObjectId
+  status       String
+  date         DateTime
+  timestamp    Int
+  status_owner String
+
+  tracking Tracking? @relation(fields: [trackingId], references: [id])
+}
+
+model Merchant {
+  id                        String  @id @default(auto()) @map("_id") @db.ObjectId
+  store_name                String
+  company_name              String
+  contact_name              String
+  contact_phone             String
+  shipping_cart_method_name String?
+  preparation_time          Int
+  website_url               String
+  address_1                 String
+  suburb                    String
+  state                     String
+  postcode                  String
+  country_code              String
+  orders                    Order[]
+}
+
+model Courier {
+  id            String  @id @default(auto()) @map("_id") @db.ObjectId
+  courier_type  String
+  quotes        Json
+  service_level String
+  success       Boolean
+  orders        Order[]
+}
+
+model User {
+  id         String  @id @default(auto()) @map("_id") @db.ObjectId
+  email      String
+  first_name String
+  last_name  String
+  orders     Order[]
+}
