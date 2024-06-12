@@ -1,25 +1,7 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { AppService } from './app.service';
-import { OrderService } from './services/order.service';
-import { Order } from '@prisma/client';
 
-@Controller('orders')
+@Controller()
 export class AppController {
-  constructor(
-    private readonly appService: AppService,
-    private readonly orderService: OrderService,
-  ) {}
-
-  @Get(':tracking_number/tracking')
-  async trackOrder(
-    @Param('tracking_number') tracking_number: string,
-  ): Promise<Order> {
-    const orders = await this.orderService.orders({
-      where: { tracking_number: tracking_number },
-    });
-
-    console.log(orders);
-
-    return orders[0];
-  }
+  constructor(private readonly appService: AppService) {}
 }
